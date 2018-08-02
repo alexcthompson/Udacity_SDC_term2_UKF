@@ -25,11 +25,32 @@ public:
   ///* state vector: [pos1 pos2 vel_abs yaw_angle yaw_rate] in SI units and rad
   VectorXd x_;
 
+  ///* predicted measurements
+  VectorXd z_pred_radar_;
+  VectorXd z_pred_lidar_;
+
+  ///* actual measurements
+  VectorXd z_meas_radar_;
+  VectorXd z_meas_lidar_;
+
   ///* state covariance matrix
   MatrixXd P_;
 
+  ///* measurement covariance matrices
+  MatrixXd S_radar_;
+  MatrixXd S_lidar_;
+
+  ///* augmented sigma points
+  MatrixXd Xsig_aug_;
+
   ///* predicted sigma points matrix
   MatrixXd Xsig_pred_;
+
+  ///* predicted measurement sigma points, radar
+  MatrixXd Zsig_radar_;
+
+  ///* predicted measurement sigma points, lidar
+  MatrixXd Zsig_lidar_;
 
   ///* time when the state is true, in us
   long long time_us_;
@@ -63,6 +84,12 @@ public:
 
   ///* Augmented state dimension
   int n_aug_;
+
+  ///* Radar space dimension
+  int n_radar_;
+
+  ///* Lidar space dimension
+  int n_lidar_;
 
   ///* Sigma point spreading parameter
   double lambda_;
@@ -102,6 +129,43 @@ public:
    * @param meas_package The measurement at k+1
    */
   void UpdateRadar(MeasurementPackage meas_package);
+
+  // Creates sigma points for the prediction update
+  void GenAugmentedSigmaPoints();
+
+  // Applies process model to a given augmented vector
+  VectorXd ProcessModel(VectorXd point, double delta_t);
+
+  // Applies process model to a matrix of points
+  void GenMatrixPrediction(double delta_t);
+
+  // Finds mean and covariance of predicted points in state space
+  void UpdateMeanCovInStateSpace();
+
+  // Maps a point to radar measurement space
+  VectorXd MapToRadarSpace(VectorXd point);
+
+  // Maps a matrix of columns to radar measurement space
+  void PredictRadarMeasurement();
+
+  // Finds mean and covariance of predicted sigma points in radar space
+  void PredictMeanCovInRadarSpace();
+
+  // Finishes the radar measurement update once sigma points and measurement are in place
+  void UpdateStateWithRadar();
+
+  // Maps a point to lidear measurement space
+  VectorXd MapToLidarSpace(VectorXd point);
+
+  // Maps a matrix of columns to lidar measurement space
+  void PredictLidarMeasurement();
+
+  // Finds mean and covariance of predicted sigma points in lidar space
+  void PredictMeanCovInLidarSpace();
+
+  // Finishes the lidar measurement update once sigma points and measurement are in place
+  void UpdateStateWithLidar();
+
 };
 
 #endif /* UKF_H */

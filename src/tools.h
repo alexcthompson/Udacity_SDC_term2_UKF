@@ -24,6 +24,8 @@ public:
   */
   VectorXd CalculateRMSE(const vector<VectorXd> &estimations, const vector<VectorXd> &ground_truth);
 
+  // wrapper method for reducing angles
+  float WrapAngle(float theta);
 };
 
 #endif /* TOOLS_H_ */
